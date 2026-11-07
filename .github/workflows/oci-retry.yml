@@ -1,0 +1,35 @@
+name: OCI A1 auto-retry
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"   # mulai job baru tiap 6 jam (tiap job mencoba ~5.5 jam, tiap 1 menit)
+  workflow_dispatch: {}      # tombol "Run workflow" manual
+
+concurrency:
+  group: oci-retry
+  cancel-in-progress: false
+
+jobs:
+  retry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install OCI CLI
+        run: pip install --quiet oci-cli
+
+      - name: Tulis config OCI dari secrets
+        env:
+          OCI_CONFIG: ${{ secrets.OCI_CONFIG }}
+          OCI_KEY: ${{ secrets.OCI_KEY }}
+        run: |
+          mkdir -p ~/.oci
+          printf '%s\n' "$OCI_KEY" > ~/.oci/key.pem
+          printf '%s\n' "$OCI_CONFIG" | sed 's#^key_file=.*#key_file=~/.oci/key.pem#' > ~/.oci/config
+          chmod 600 ~/.oci/key.pem ~/.oci/config
+          oci setup repair-file-permissions --file ~/.oci/config || true
+          oci setup repair-file-permissions --file ~/.oci/key.pem || true
+
+      - name: Jalankan retry
+        run: bash retry.sh
