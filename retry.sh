@@ -4,8 +4,8 @@
 
 REGION="ap-batam-1"
 NAME="feian"
-OCPU=2                       # ganti ke 1 kalau mau peluang lebih besar
-MEM=12                       # ganti ke 6 kalau OCPU=1
+OCPU=1                       # ganti ke 1 kalau mau peluang lebih besar
+MEM=6                       # ganti ke 6 kalau OCPU=1
 SUBNET_NAME="public subnet-feian"
 WAIT_CAPACITY=60
 WAIT_THROTTLE=180
